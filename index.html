@@ -1,0 +1,3662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrightSign Partner Finder</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-input-wrapper {
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #667eea;
+        }
+        
+        .search-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .search-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .examples {
+            margin-top: 15px;
+        }
+        
+        .examples-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .example-btn {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 4px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .results-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .result-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .result-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .partner-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .score-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .score-high {
+            background: #10b981;
+            color: white;
+        }
+        
+        .score-medium {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .score-low {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .reasons-list {
+            list-style: none;
+            margin-bottom: 15px;
+        }
+        
+        .reason-item {
+            padding: 8px 0;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .reason-item.positive {
+            color: #10b981;
+        }
+        
+        .reason-item.negative {
+            color: #ef4444;
+        }
+        
+        .reason-item.neutral {
+            color: #6b7280;
+        }
+        
+        .reason-icon {
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        
+        .details-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .details-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .tag {
+            padding: 4px 10px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+        
+        .error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Partner data will be embedded here
+        const PARTNER_DATA = {
+  "partners": [
+    {
+      "name": "Appspace",
+      "verticals": {
+        "Retail": 0.1,
+        "Corporate": 0.6,
+        "Banking": 0.0,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.0,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.1,
+        "Education": 0.2,
+        "Transportation": 0.0,
+        "Advertising": 0.0,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US",
+        "India"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": false,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": false,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": false,
+        "Real Time Events - Serial": false,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": false,
+        "Scheduled Screenshots": false,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": false,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Brightness Control": false,
+        "Bdeploy": true,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": false,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": true,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": true,
+        "Install JSON config (not Bdeploy)": true,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": true,
+        "Audio": true,
+        "IPTV Stream": true,
+        "Live TV": false,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": true,
+        "Web - Asana": true,
+        "Web RingCentral": true,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": true,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "UK Travel Boards (Train & Bus)": " ",
+        "SOC2": true,
+        "ISO27001": true,
+        "IS27017": true,
+        "CSA STAR LEVEL 1": true,
+        "On prem": true,
+        "Cloud (SaaS)": true,
+        "Hybrid": false
+      }
+    },
+    {
+      "name": "Navori",
+      "verticals": {
+        "Retail": 0.25,
+        "Corporate": 0.1,
+        "Banking": 0.05,
+        "QSR/C-store": 0.2,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.05,
+        "Healthcare": 0.05,
+        "Education": 0.05,
+        "Transportation": 0.1,
+        "Advertising": 0.05,
+        "Government": 0.05,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US",
+        "India"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": false,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": false,
+        "Trigger actions when media asset plays": false,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": true,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": "\ud83d\uddd9 BS Portal",
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": false,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": false,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": false,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": false,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": true,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Brightness Control": false,
+        "Bdeploy": false,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": true,
+        "Console window - Hotkey": true,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": true,
+        "Device Logs - Save logs to pendrive": true,
+        "Move to server": "\ud83d\uddd9?????",
+        "Install JSON config (not Bdeploy)": true,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": true,
+        "Audio": false,
+        "IPTV Stream": false,
+        "Live TV": false,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": true,
+        "Web - Asana": true,
+        "Web RingCentral": true,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": true,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "SOC2": true,
+        "On prem": true,
+        "Cloud (SaaS)": true,
+        "Hybrid": true
+      }
+    },
+    {
+      "name": "Signagelive",
+      "verticals": {},
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": false,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": false,
+        "Content rules/triggers badsed on weather, temp etc)": false,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": false,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": true,
+        "Grouping": false,
+        "Folder option ": false,
+        "Tagging": true,
+        "Image": false,
+        "Video": false,
+        "Video ": true,
+        "Audio": true,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": " ",
+        "Web - Asana": false,
+        "Web RingCentral": true,
+        "Microsoft Files": false,
+        "Google Sheets": true,
+        "Adobe": false,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": false,
+        "News": true,
+        "Sharepoint": true,
+        "Counter/Countdown": true,
+        "ISO27001": true,
+        "Cloud (SaaS)": true
+      }
+    },
+    {
+      "name": "Embed Signage",
+      "verticals": {
+        "Retail": 0.2,
+        "Corporate": 0.15,
+        "Banking": 0.05,
+        "QSR/C-store": 0.2,
+        "Hospitality": 0.1,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.05,
+        "Education": 0.1,
+        "Transportation": 0.05,
+        "Advertising": 0.05,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": true,
+        "Bezel compensation": "XT/XC5",
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": "\u00a0",
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": "X",
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": "X",
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": true,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": "X",
+        "Brightness Control": "X",
+        "Bdeploy": "X",
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": true,
+        "Console window - Hotkey": "X",
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": "X",
+        "Device Logs - Save logs to pendrive": "X",
+        "Move to server": "X",
+        "Install JSON config (not Bdeploy)": "X",
+        "Auto DetectIP": true,
+        "Media Type": "\u00a0",
+        "Image": true,
+        "Video": true,
+        "Video ": true,
+        "Audio": true,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": "X",
+        "Web - Sisense": "X",
+        "Web - Sharepoint": "X",
+        "Web - Qlik": "X",
+        "Web - PowerBI": true,
+        "Web - New Relic": "X",
+        "Web - Monday.com": "X",
+        "Web - Jira": "X",
+        "Web - Grow": "X",
+        "Web - Grafana Labs": "X",
+        "Web- DataDog": "X",
+        "Web - Cyfe": "X",
+        "Web - Looker": "X",
+        "Web - Smarppee": "X",
+        "Web - Asana": "X",
+        "Web RingCentral": "X",
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": "X",
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": "X",
+        "NodeJS Scripts": "X",
+        "Custom/System Fonts": true,
+        "Apps/Widgets/Cards": "\u00a0",
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": "X",
+        "PowerBI": true,
+        "Tableu": "X",
+        "Salesforce": "X",
+        "News": true,
+        "Teams": true,
+        "Sharepoint": false,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": false,
+        "Banner": true,
+        "TFL tube status": true,
+        "UK Travel Boards (Train & Bus)": true,
+        "ISO27001": true,
+        "Cloud (SaaS)": true
+      }
+    },
+    {
+      "name": "ConnectSignage",
+      "verticals": {
+        "Retail": 0.3,
+        "Corporate": 0.7,
+        "Banking": 0.0,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.0,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.0,
+        "Education": 0.0,
+        "Transportation": 0.0,
+        "Advertising": 0.0,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe"
+      ],
+      "features": {}
+    },
+    {
+      "name": "NowSignage",
+      "verticals": {
+        "Retail": 0.32,
+        "Corporate": 0.08,
+        "Banking": 0.04,
+        "QSR/C-store": 0.21,
+        "Hospitality": 0.02,
+        "Stadiums/Venues": 0.02,
+        "Attractions": 0.01,
+        "Healthcare": 0.08,
+        "Education": 0.06,
+        "Transportation": 0.02,
+        "Advertising": 0.14,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": false,
+        "Real Time Events - TCP": false,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": false,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": false,
+        "Soft Triggers": false,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": false,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": false,
+        "Content rules/triggers badsed on weather, temp etc)": false,
+        "Remote Firmware updates": false,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": false,
+        "Ondemand Remote Reboots": false,
+        "Scheduled Reboots": false,
+        "On demand Remote Screenshots": false,
+        "Scheduled Screenshots": false,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": false,
+        "Reporting - CPU Usage": false,
+        "Reporting - Disk Usage": false,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": false,
+        "Reporting - Sensor, user events": false,
+        "Reporting - Log events": false,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": false,
+        "Reporting - Display Information": false,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": false,
+        "Manual update of device": false,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": true,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": false,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": false,
+        "Device Logs - System Logs": false,
+        "Device Logs - Application settings dump": false,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": false,
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": false,
+        "Image": true,
+        "Video": false,
+        "Video ": false,
+        "Audio": false,
+        "IPTV Stream": true,
+        "Live TV": false,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": false,
+        "Web - Sisense": false,
+        "Web - Sharepoint": true,
+        "Web - Qlik": false,
+        "Web - PowerBI": true,
+        "Web - New Relic": false,
+        "Web - Monday.com": false,
+        "Web - Jira": false,
+        "Web - Grow": false,
+        "Web - Grafana Labs": false,
+        "Web- DataDog": false,
+        "Web - Cyfe": false,
+        "Web - Looker": false,
+        "Web - Smarppee": false,
+        "Web - Asana": false,
+        "Web RingCentral": false,
+        "Microsoft Files": false,
+        "Google Sheets": true,
+        "Adobe": false,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": false,
+        "NodeJS Scripts": false,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": false,
+        "Sharepoint": false,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": false,
+        "Milestone": false,
+        "Banner": false,
+        "Cloud (SaaS)": true
+      }
+    },
+    {
+      "name": "Deneva",
+      "verticals": {
+        "Retail": 0.3,
+        "Corporate": 0.05,
+        "Banking": 0.08,
+        "QSR/C-store": 0.08,
+        "Hospitality": 0.04,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.03,
+        "Education": 0.02,
+        "Transportation": 0.3,
+        "Advertising": 0.1,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "Frame by frame syncronisation": true,
+        "Image": true,
+        "Video": true,
+        "ISO27001": true
+      }
+    },
+    {
+      "name": "CRI Reflect*",
+      "verticals": {
+        "Retail": 0.2,
+        "Corporate": 0.05,
+        "Banking": 0.05,
+        "QSR/C-store": 0.35,
+        "Hospitality": 0.0,
+        "Stadiums/Venues": 0.1,
+        "Attractions": 0.15,
+        "Healthcare": 0.0,
+        "Education": 0.0,
+        "Transportation": 0.0,
+        "Advertising": 0.1,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "US"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Uniguest",
+      "verticals": {
+        "Retail": 0.0,
+        "Corporate": 0.12,
+        "Banking": 0.08,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.25,
+        "Stadiums/Venues": 0.1,
+        "Attractions": 0.0,
+        "Healthcare": 0.15,
+        "Education": 0.08,
+        "Transportation": 0.0,
+        "Advertising": 0.0,
+        "Government": 0.08,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.14
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US",
+        "India"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Sagenet*",
+      "verticals": {
+        "Retail": 0.3,
+        "Corporate": 0.1,
+        "Banking": 0.05,
+        "QSR/C-store": 0.25,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.1,
+        "Education": 0.0,
+        "Transportation": 0.05,
+        "Advertising": 0.1,
+        "Government": 0.0
+      },
+      "regions": [
+        "US"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Zynchro",
+      "verticals": {},
+      "regions": [
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Frame by frame syncronisation": true,
+        "Image": true,
+        "Video": true
+      }
+    },
+    {
+      "name": "Easescreen",
+      "verticals": {
+        "Retail": 0.2,
+        "Corporate": 0.2,
+        "Banking": 0.1,
+        "QSR/C-store": 0.01,
+        "Hospitality": 0.15,
+        "Stadiums/Venues": 0.02,
+        "Attractions": 0.05,
+        "Healthcare": 0.05,
+        "Education": 0.05,
+        "Transportation": 0.05,
+        "Advertising": 0.02,
+        "Government": 0.1,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "US"
+      ],
+      "features": {
+        "SOC2": false,
+        "ISO27001": false,
+        "IS27017": false,
+        "CSA STAR LEVEL 1": false,
+        "On prem": true,
+        "Cloud (SaaS)": true,
+        "Hybrid": true
+      }
+    },
+    {
+      "name": "Korbyt",
+      "verticals": {
+        "Retail": 0.1,
+        "Corporate": 0.35,
+        "Banking": 0.1,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.1,
+        "Education": 0.05,
+        "Transportation": 0.0,
+        "Advertising": 0.0,
+        "Government": 0.0,
+        "Contact Centre": 0.25,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": "?",
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": false,
+        "GPIO Triggers i.e. Nexmosphere": false,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": true,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": false,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": true,
+        "Grouping": false,
+        "Folder option ": false,
+        "Tagging": true,
+        "Console window - Console": true,
+        "Console window - Hotkey": true,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": false,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": false,
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": false,
+        "Video ": true,
+        "Audio": "?",
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Sharepoint": true,
+        "Web - PowerBI": true,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": "?",
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": false,
+        "Banner": false,
+        "TFL tube status": false,
+        "SOC2": true,
+        "On prem": true,
+        "Cloud (SaaS)": true
+      }
+    },
+    {
+      "name": "Omnivex",
+      "verticals": {
+        "Retail": 0.03,
+        "Corporate": 0.36,
+        "Banking": 0.07,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.01,
+        "Stadiums/Venues": 0.08,
+        "Attractions": 0.0,
+        "Healthcare": 0.03,
+        "Education": 0.05,
+        "Transportation": 0.23,
+        "Advertising": 0.12,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "APAC",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": false,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": "?",
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": true,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Image": true,
+        "Video": false,
+        "Video ": true,
+        "Audio": false,
+        "IPTV Stream": true,
+        "Live TV": false,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": true,
+        "Web - Asana": true,
+        "Web RingCentral": false,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": false,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": true,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": false,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": false,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "TFL tube status": true,
+        "UK Travel Boards (Train & Bus)": true,
+        "SOC2": true
+      }
+    },
+    {
+      "name": "MoodMedia",
+      "verticals": {},
+      "regions": [
+        "Europe",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Frame by frame syncronisation": true,
+        "Image": true,
+        "Video": true
+      }
+    },
+    {
+      "name": "OnSignTV",
+      "verticals": {},
+      "regions": [
+        "Europe",
+        "US"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Wallboard",
+      "verticals": {
+        "Retail": 0.2,
+        "Corporate": 0.3,
+        "Banking": 0.05,
+        "QSR/C-store": 0.05,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.1,
+        "Attractions": 0.05,
+        "Healthcare": 0.05,
+        "Education": 0.1,
+        "Transportation": 0.02,
+        "Advertising": 0.03,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": true,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": true,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": true,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Brightness Control": true,
+        "Bdeploy": true,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": true,
+        "Console window - Hotkey": true,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": true,
+        "Device Logs - Save logs to pendrive": true,
+        "Move to server": true,
+        "Install JSON config (not Bdeploy)": true,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": false,
+        "Audio": false,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": false,
+        "Web - Sisense": false,
+        "Web - Sharepoint": false,
+        "Web - Qlik": false,
+        "Web - PowerBI": true,
+        "Web - New Relic": false,
+        "Web - Monday.com": false,
+        "Web - Jira": false,
+        "Web - Grow": false,
+        "Web - Grafana Labs": false,
+        "Web- DataDog": false,
+        "Web - Cyfe": false,
+        "Web - Looker": false,
+        "Web - Smarppee": false,
+        "Web - Asana": false,
+        "Web RingCentral": false,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": true,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": false,
+        "Salesforce": false,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": false,
+        "Banner": false,
+        "TFL tube status": false,
+        "UK Travel Boards (Train & Bus)": false,
+        "SOC2": false,
+        "ISO27001": false,
+        "IS27017": false,
+        "CSA STAR LEVEL 1": false,
+        "On prem": true,
+        "Cloud (SaaS)": true,
+        "Hybrid": true
+      }
+    },
+    {
+      "name": "Mvix",
+      "verticals": {},
+      "regions": [
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Frame by frame syncronisation": true,
+        "Image": true,
+        "Video": true
+      }
+    },
+    {
+      "name": "CleverDisplay",
+      "verticals": {
+        "Retail": 0.2,
+        "Corporate": 0.2,
+        "Banking": 0.0,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.3,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.05,
+        "Healthcare": 0.1,
+        "Education": 0.05,
+        "Transportation": 0.1,
+        "Advertising": 0.0,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": false,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": false,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": true,
+        "Grouping": false,
+        "Folder option ": false,
+        "Tagging": true,
+        "Image": false,
+        "Video": false,
+        "Video ": true,
+        "Audio": false,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": " ",
+        "Web - Asana": false,
+        "Web RingCentral": true,
+        "Microsoft Files": false,
+        "Google Sheets": true,
+        "Adobe": false,
+        "Data Source - Json": false,
+        "Data Source - XML": false,
+        "Data Source - Ical ": false,
+        "NodeJS Scripts": false,
+        "Custom/System Fonts": false,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": false,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": false,
+        "News": true,
+        "Teams": false,
+        "Sharepoint": true,
+        "Alert": false,
+        "Announcement": false,
+        "Counter/Countdown": true,
+        "Milestone": false,
+        "Banner": false,
+        "TFL tube status": false,
+        "UK Travel Boards (Train & Bus)": false
+      }
+    },
+    {
+      "name": "Intuiface",
+      "verticals": {
+        "Retail": 0.15,
+        "Corporate": 0.2,
+        "Banking": 0.05,
+        "QSR/C-store": 0.05,
+        "Hospitality": 0.1,
+        "Stadiums/Venues": 0.1,
+        "Attractions": 0.2,
+        "Healthcare": 0.05,
+        "Education": 0.05,
+        "Transportation": 0.0,
+        "Advertising": 0.05,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": false,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": false,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": false,
+        "Asset by asset synchronisation": false,
+        "Frame by frame syncronisation": false,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": true,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": false,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": false,
+        "Reporting - System Start": false,
+        "Reporting - CPU Usage": false,
+        "Reporting - Disk Usage": false,
+        "Reporting - RAM Usage": false,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": false,
+        "Reporting - Log events": false,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": false,
+        "Reporting - Network": false,
+        "Reporting - System Reboot": false,
+        "Reporting - Display Information": false,
+        "Reporting - Versions": false,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": false,
+        "Manual update of device": false,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": false,
+        "Grouping": false,
+        "Folder option ": false,
+        "Tagging": true,
+        "Console window - Console": false,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": false,
+        "Device Logs - Application settings dump": true,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": false,
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": true,
+        "Web - Asana": true,
+        "Web RingCentral": false,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": false,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "TFL tube status": true,
+        "UK Travel Boards (Train & Bus)": true,
+        "SOC2": true,
+        "ISO27001": true,
+        "IS27017": false,
+        "CSA STAR LEVEL 1": false
+      }
+    },
+    {
+      "name": "Poppulo FWI",
+      "verticals": {
+        "Retail": 0.07,
+        "Corporate": 0.2,
+        "Banking": 0.05,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.3,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.05,
+        "Education": 0.1,
+        "Transportation": 0.05,
+        "Advertising": 0.01,
+        "Government": 0.03,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.12,
+        "Other": 0.02
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US",
+        "India"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": false,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": false,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": false,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": false,
+        "Synchronisation of Layouts across multiple screens/players (any media)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": false,
+        "Asset by asset synchronisation": false,
+        "Frame by frame syncronisation": false,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": false,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": false,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": false,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Brightness Control": false,
+        "Bdeploy": true,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": true,
+        "Console window - Hotkey": true,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": false,
+        "Device Logs - Save logs to pendrive": true,
+        "Move to server": true,
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": false,
+        "Video ": false,
+        "Audio": false,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web - Sharepoint": true,
+        "Microsoft Files": false,
+        "Google Sheets": false,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": false,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "TFL tube status": false,
+        "UK Travel Boards (Train & Bus)": false,
+        "ISO27001": true,
+        "On prem": true,
+        "Cloud (SaaS)": true
+      }
+    },
+    {
+      "name": "WovenMedia",
+      "verticals": {},
+      "regions": [
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Frame by frame syncronisation": true,
+        "Image": true,
+        "Video": true
+      }
+    },
+    {
+      "name": "PingHD",
+      "verticals": {},
+      "regions": [
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Image": true,
+        "Video": true
+      }
+    },
+    {
+      "name": "PADS4",
+      "verticals": {
+        "Retail": 0.1,
+        "Corporate": 0.3,
+        "Banking": 0.1,
+        "QSR/C-store": 0.05,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.05,
+        "Attractions": 0.05,
+        "Healthcare": 0.05,
+        "Education": 0.05,
+        "Transportation": 0.2,
+        "Advertising": 0.0,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": false,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": false,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": false,
+        "Real Time Events - Serial": false,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": false,
+        "Soft Triggers": false,
+        "Serial Triggers i.e. Nexmosphere": false,
+        "GPIO Triggers i.e. Nexmosphere": false,
+        "Proof of Play": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - System Start": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed software": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": true,
+        "Console window - Hotkey": true,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - Application settings dump": true,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": true,
+        "Web": true,
+        "Web - PowerBI": true,
+        "Microsoft Files": "As data source",
+        "Google Sheets": "As data source",
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Custom/System Fonts": true,
+        "Social Media": "As data source",
+        "LinkedIn": "As data source",
+        "YouTube": "As data source",
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "News": "As data source",
+        "Teams": true,
+        "Sharepoint": "As data source",
+        "Alert": "As data source",
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true
+      }
+    },
+    {
+      "name": "DISE",
+      "verticals": {},
+      "regions": [
+        "Europe",
+        "MEA",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": false,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": false,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": false,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": false,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": false,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to define size and position of zones": false,
+        "MultiZone Media Playback - Scrolling Text": false,
+        "Gapless Playback of images (no black)": false,
+        "Gapless Playback of video (no black)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": false,
+        "Synchronisation of Layouts across multiple screens/players (any media)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": false,
+        "Asset by asset synchronisation": false,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": false,
+        "Native Portrait": false,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": false,
+        "Real Time Events - TCP": false,
+        "Real Time Events - Serial": false,
+        "Trigger actions when media asset plays": false,
+        "Remote Firmware updates": false,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": false,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": false,
+        "Reporting - Disk Usage": false,
+        "Reporting - RAM Usage": false,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": false,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": false,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": "?",
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": "?",
+        "Console window - Hotkey": "?",
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": false,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": "?",
+        "Install JSON config (not Bdeploy)": "?",
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": false,
+        "Audio": true,
+        "IPTV Stream": true,
+        "Live TV": false,
+        "Web": true,
+        "Web - Splunk": false,
+        "Web - Sisense": false,
+        "Web - Sharepoint": false,
+        "Web - Qlik": false,
+        "Web - PowerBI": false,
+        "Web - New Relic": false,
+        "Web - Monday.com": false,
+        "Web - Jira": false,
+        "Web - Grow": false,
+        "Web - Grafana Labs": false,
+        "Web- DataDog": false,
+        "Web - Cyfe": false,
+        "Web - Looker": false,
+        "Web - Smarppee": false,
+        "Web - Asana": false,
+        "Web RingCentral": false,
+        "Microsoft Files": false,
+        "Google Sheets": true,
+        "Adobe": false,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": false,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "SOC2": "In progress",
+        "ISO27001": true,
+        "IS27017": false,
+        "CSA STAR LEVEL 1": false
+      }
+    },
+    {
+      "name": "WallSign",
+      "verticals": {
+        "Retail": 0.75,
+        "Corporate": 0.05,
+        "Banking": 0.05,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.0,
+        "Healthcare": 0.05,
+        "Education": 0.0,
+        "Transportation": 0.0,
+        "Advertising": 0.05,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [],
+      "features": {
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Temperature": true,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Tagging": true,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true
+      }
+    },
+    {
+      "name": "Carousel",
+      "verticals": {
+        "Retail": 0.05,
+        "Corporate": 0.2,
+        "Banking": 0.05,
+        "QSR/C-store": 0.05,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.05,
+        "Attractions": 0.03,
+        "Healthcare": 0.1,
+        "Education": 0.4,
+        "Transportation": 0.02,
+        "Advertising": 0.0,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "US"
+      ],
+      "features": {
+        "SOC2": true
+      }
+    },
+    {
+      "name": "Livesignage",
+      "verticals": {},
+      "regions": [
+        "Europe"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": false,
+        "Frame by frame syncronisation": false,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": false,
+        "Proof of Play": false,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": false,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": false,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": false,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": false,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": false,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": true,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": false,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": false,
+        "Brightness Control": true,
+        "Bdeploy": false,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": false,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": false,
+        "Device Logs - Application settings dump": true,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": false,
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": false,
+        "Audio": true,
+        "IPTV Stream": false,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": false,
+        "Web - Splunk": false,
+        "Web - Sisense": false,
+        "Web - Sharepoint": false,
+        "Web - Qlik": false,
+        "Web - PowerBI": true,
+        "Web - New Relic": false,
+        "Web - Monday.com": false,
+        "Web - Jira": false,
+        "Web - Grow": false,
+        "Web - Grafana Labs": false,
+        "Web- DataDog": false,
+        "Web - Cyfe": false,
+        "Web - Looker": false,
+        "Web - Smarppee": false,
+        "Web - Asana": false,
+        "Web RingCentral": false,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": false,
+        "NodeJS Scripts": false,
+        "Custom/System Fonts": false,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": false,
+        "Sharepoint": false,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "TFL tube status": false,
+        "UK Travel Boards (Train & Bus)": false,
+        "SOC2": false,
+        "ISO27001": false,
+        "IS27017": false,
+        "CSA STAR LEVEL 1": false
+      }
+    },
+    {
+      "name": "Pickcel",
+      "verticals": {
+        "Retail": 0.25,
+        "Corporate": 0.3,
+        "Banking": 0.05,
+        "QSR/C-store": 0.2,
+        "Hospitality": 0.05,
+        "Stadiums/Venues": 0.01,
+        "Attractions": 0.02,
+        "Healthcare": 0.05,
+        "Education": 0.05,
+        "Transportation": 0.01,
+        "Advertising": 0.03,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe",
+        "MEA",
+        "US",
+        "India"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": false,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": false,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": false,
+        "Synchronisation of Layouts across multiple screens/players (any media)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": false,
+        "Asset by asset synchronisation": false,
+        "Frame by frame syncronisation": false,
+        "Screen Orientation": false,
+        "Native Portrait": false,
+        "Recurrence of Media Assets in a Playlist": false,
+        "Conditionally include Media Assets in a Playlist": false,
+        "Validity of Media Assets in a Playlist": false,
+        "Real Time Events - HTTP": false,
+        "Real Time Events - TCP": false,
+        "Real Time Events - Serial": false,
+        "Trigger actions when media asset plays": false,
+        "Playlist within a playlist": true,
+        "Nested Playlists": false,
+        "Local Playlists": false,
+        "Web Triggers": false,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": false,
+        "GPIO Triggers i.e. Nexmosphere": false,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": false,
+        "Content rules/triggers badsed on weather, temp etc)": false,
+        "Remote Firmware updates": false,
+        "Remote Application updates": false,
+        "Scheduled Screen On/Off": false,
+        "Ondemand Remote Reboots": false,
+        "Scheduled Reboots": false,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": false,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": false,
+        "Reporting - System Start": false,
+        "Reporting - CPU Usage": false,
+        "Reporting - Disk Usage": false,
+        "Reporting - RAM Usage": false,
+        "Reporting - Time Zone": false,
+        "Reporting - Sensor, user events": false,
+        "Reporting - Log events": false,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": false,
+        "Reporting - Network": false,
+        "Reporting - System Reboot": false,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": false,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": false,
+        "Supports Proxy Server": false,
+        "Volume Control": false,
+        "Manual update of device": false,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": false,
+        "Grouping": true,
+        "Folder option ": false,
+        "Tagging": true,
+        "Console window - Console": false,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": false,
+        "Device Logs - System Logs": false,
+        "Device Logs - Application settings dump": false,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": false,
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": false,
+        "Image": true,
+        "Video": true,
+        "Video ": true,
+        "Audio": false,
+        "IPTV Stream": false,
+        "Live TV": false,
+        "Web": true,
+        "Web secure dashboards": false,
+        "Web - Splunk": false,
+        "Web - Sisense": false,
+        "Web - Sharepoint": false,
+        "Web - Qlik": false,
+        "Web - PowerBI": true,
+        "Web - New Relic": false,
+        "Web - Monday.com": false,
+        "Web - Jira": false,
+        "Web - Grow": false,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": false,
+        "Web - Cyfe": false,
+        "Web - Looker": false,
+        "Web - Smarppee": false,
+        "Web - Asana": false,
+        "Web RingCentral": false,
+        "Microsoft Files": false,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": false,
+        "Data Source - XML": false,
+        "Data Source - Ical ": false,
+        "NodeJS Scripts": false,
+        "Custom/System Fonts": false,
+        "Social Media": true,
+        "LinkedIn": false,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": false,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": false,
+        "Alert": false,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "TFL tube status": false,
+        "UK Travel Boards (Train & Bus)": true,
+        "SOC2": true,
+        "ISO27001": true,
+        "On prem": true
+      }
+    },
+    {
+      "name": "Stratos Media",
+      "verticals": {},
+      "regions": [
+        "Europe",
+        "MEA",
+        "APAC",
+        "ANZ",
+        "US"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Jio Signage",
+      "verticals": {},
+      "regions": [
+        "India"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Metavision",
+      "verticals": {
+        "Retail": 0.05,
+        "Corporate": 0.3,
+        "Banking": 0.0,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.0,
+        "Stadiums/Venues": 0.05,
+        "Attractions": 0.1,
+        "Healthcare": 0.15,
+        "Education": 0.2,
+        "Transportation": 0.15,
+        "Advertising": 0.0,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "Europe"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": false,
+        "Synchronisation of Layouts across multiple screens/players (any media)": false,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": false,
+        "Asset by asset synchronisation": false,
+        "Frame by frame syncronisation": false,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": false,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": false,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": true,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": false,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": false,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": false,
+        "Reporting - Temperature": true,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": true,
+        "Reporting - Display Information": false,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": true,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": false,
+        "Volume Control": false,
+        "Manual update of device": true,
+        "Update application by limiting version": false,
+        "Brightness Control": false,
+        "Bdeploy": false,
+        "Grouping": true,
+        "Folder option ": false,
+        "Tagging": true,
+        "Console window - Console": true,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": false,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": "?",
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": true,
+        "Audio": true,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": true,
+        "Web - Asana": true,
+        "Web RingCentral": true,
+        "Microsoft Files": false,
+        "Google Sheets": false,
+        "Adobe": false,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": true,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "TFL tube status": "?",
+        "UK Travel Boards (Train & Bus)": true,
+        "SOC2": false,
+        "ISO27001": false,
+        "IS27017": false,
+        "CSA STAR LEVEL 1": false
+      }
+    },
+    {
+      "name": "Ablesign",
+      "verticals": {},
+      "regions": [
+        "Europe"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Novisign",
+      "verticals": {},
+      "regions": [],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": false,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": true,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": false,
+        "Real Time Events - Serial": true,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": false,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": true,
+        "Soft Triggers": true,
+        "Serial Triggers i.e. Nexmosphere": true,
+        "GPIO Triggers i.e. Nexmosphere": true,
+        "Proof of Play": true,
+        "Geo-Fencing": false,
+        "Bezel compensation": false,
+        "Dynamic Playlist creation based on media tags": false,
+        "Content rules/triggers badsed on weather, temp etc)": false,
+        "Remote Firmware updates": true,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": false,
+        "Ondemand Remote Reboots": false,
+        "Scheduled Reboots": false,
+        "On demand Remote Screenshots": false,
+        "Scheduled Screenshots": false,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": false,
+        "Reporting - CPU Usage": false,
+        "Reporting - Disk Usage": false,
+        "Reporting - RAM Usage": false,
+        "Reporting - Time Zone": false,
+        "Reporting - Sensor, user events": true,
+        "Reporting - Log events": true,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": false,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": false,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": false,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": true,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Brightness Control": false,
+        "Bdeploy": false,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": false,
+        "Console window - Console": true,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": true,
+        "Device Logs - Save logs to pendrive": true,
+        "Move to server": true,
+        "Install JSON config (not Bdeploy)": true,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": false,
+        "Video ": false,
+        "Audio": false,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": true,
+        "Web - Asana": true,
+        "Web RingCentral": true,
+        "Microsoft Files": true,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": true,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": true,
+        "Social Media": true,
+        "LinkedIn": true,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "TFL tube status": false,
+        "UK Travel Boards (Train & Bus)": true,
+        "SOC2": true,
+        "ISO27001": true,
+        "IS27017": true,
+        "CSA STAR LEVEL 1": false
+      }
+    },
+    {
+      "name": "Brandvision/PWC",
+      "verticals": {},
+      "regions": [],
+      "features": {}
+    },
+    {
+      "name": "Commeen",
+      "verticals": {},
+      "regions": [
+        "Europe"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Thisplays2",
+      "verticals": {},
+      "regions": [
+        "Europe"
+      ],
+      "features": {}
+    },
+    {
+      "name": "FinesseTech",
+      "verticals": {},
+      "regions": [
+        "MEA"
+      ],
+      "features": {}
+    },
+    {
+      "name": "Wesolutions",
+      "verticals": {},
+      "regions": [],
+      "features": {}
+    },
+    {
+      "name": "easysignage",
+      "verticals": {
+        "Retail": 0.45,
+        "Corporate": 0.1,
+        "Banking": 0.05,
+        "QSR/C-store": 0.0,
+        "Hospitality": 0.1,
+        "Stadiums/Venues": 0.0,
+        "Attractions": 0.05,
+        "Healthcare": 0.05,
+        "Education": 0.1,
+        "Transportation": 0.0,
+        "Advertising": 0.1,
+        "Government": 0.0,
+        "Contact Centre": 0.0,
+        "K12": 0.0,
+        "Worship": 0.0,
+        "Manufacturing": 0.0,
+        "Other": 0.0
+      },
+      "regions": [
+        "MEA",
+        "ANZ",
+        "US"
+      ],
+      "features": {
+        "Fullscreen media Playback": true,
+        "Multizone Media Playback": true,
+        "Multizone Media Playback-ability to overlay transparent images over video": true,
+        "MultiZone Media Playback - Ability to have unlimited zones (within the capabilities of the device)": true,
+        "MultiZone Media Playback - Ability to overlay 1 video on top of another (or part of another)": true,
+        "MultiZone Media Playback - Ability to overlay web based content (websites and widgets) on top of other content": true,
+        "MultiZone Media Playback - Ability to play 2 HD videos concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and live tv concurrently": true,
+        "MultiZone Media Playback - Ability to play HD video and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to play Live TV and IPTV concurrently": true,
+        "MultiZone Media Playback - Ability to define size and position of zones": true,
+        "MultiZone Media Playback - Scrolling Text": true,
+        "Gapless Playback of images (no black)": true,
+        "Gapless Playback of video (no black)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (any single media type)": true,
+        "Synchronisation of Layouts across multiple screens/players (any media)": true,
+        "Synchronisation of fullscreen media across multiple screens/players (video only)": true,
+        "Asset by asset synchronisation": true,
+        "Frame by frame syncronisation": false,
+        "Screen Orientation": true,
+        "Native Portrait": true,
+        "Recurrence of Media Assets in a Playlist": true,
+        "Conditionally include Media Assets in a Playlist": true,
+        "Validity of Media Assets in a Playlist": true,
+        "Real Time Events - HTTP": true,
+        "Real Time Events - TCP": true,
+        "Real Time Events - Serial": false,
+        "Trigger actions when media asset plays": true,
+        "Playlist within a playlist": true,
+        "Nested Playlists": true,
+        "Local Playlists": true,
+        "Web Triggers": true,
+        "Local Triggers": false,
+        "Soft Triggers": false,
+        "Serial Triggers i.e. Nexmosphere": false,
+        "GPIO Triggers i.e. Nexmosphere": false,
+        "Proof of Play": true,
+        "Geo-Fencing": true,
+        "Bezel compensation": true,
+        "Dynamic Playlist creation based on media tags": true,
+        "Content rules/triggers badsed on weather, temp etc)": true,
+        "Remote Firmware updates": false,
+        "Remote Application updates": true,
+        "Scheduled Screen On/Off": true,
+        "Ondemand Remote Reboots": true,
+        "Scheduled Reboots": true,
+        "On demand Remote Screenshots": true,
+        "Scheduled Screenshots": false,
+        "Scheduled content downloads": true,
+        "Local content cache": true,
+        "Reporting - Geolocation": true,
+        "Reporting - System Start": true,
+        "Reporting - CPU Usage": true,
+        "Reporting - Disk Usage": true,
+        "Reporting - RAM Usage": true,
+        "Reporting - Time Zone": true,
+        "Reporting - Sensor, user events": false,
+        "Reporting - Log events": false,
+        "Reporting - Graphics": true,
+        "Reporting - Temperature": true,
+        "Reporting - Network": true,
+        "Reporting - System Reboot": false,
+        "Reporting - Display Information": true,
+        "Reporting - Versions": true,
+        "Reporting - Installed 'on' and by 'whom'": true,
+        "Reporting - Installed software": true,
+        "Supports Proxy Server": false,
+        "Volume Control": true,
+        "Manual update of device": true,
+        "Update application by limiting version": true,
+        "Brightness Control": true,
+        "Bdeploy": false,
+        "Grouping": true,
+        "Folder option ": true,
+        "Tagging": true,
+        "Console window - Console": false,
+        "Console window - Hotkey": false,
+        "Device Logs - Application (and displayer) logs": true,
+        "Device Logs - System Logs": true,
+        "Device Logs - Application settings dump": false,
+        "Device Logs - Save logs to pendrive": false,
+        "Move to server": false,
+        "Install JSON config (not Bdeploy)": false,
+        "Auto DetectIP": true,
+        "Image": true,
+        "Video": true,
+        "Video ": true,
+        "Audio": true,
+        "IPTV Stream": true,
+        "Live TV": true,
+        "Web": true,
+        "Web secure dashboards": true,
+        "Web - Splunk": true,
+        "Web - Sisense": true,
+        "Web - Sharepoint": true,
+        "Web - Qlik": true,
+        "Web - PowerBI": true,
+        "Web - New Relic": true,
+        "Web - Monday.com": true,
+        "Web - Jira": true,
+        "Web - Grow": true,
+        "Web - Grafana Labs": true,
+        "Web- DataDog": true,
+        "Web - Cyfe": true,
+        "Web - Looker": true,
+        "Web - Smarppee": true,
+        "Web - Asana": true,
+        "Web RingCentral": true,
+        "Microsoft Files": false,
+        "Google Sheets": true,
+        "Adobe": true,
+        "Data Source - Json": true,
+        "Data Source - XML": true,
+        "Data Source - Ical ": false,
+        "NodeJS Scripts": true,
+        "Custom/System Fonts": false,
+        "Social Media": true,
+        "LinkedIn": false,
+        "YouTube": true,
+        "Maps/Traffic": true,
+        "PowerBI": true,
+        "Tableu": true,
+        "Salesforce": true,
+        "News": true,
+        "Teams": true,
+        "Sharepoint": true,
+        "Alert": true,
+        "Announcement": true,
+        "Counter/Countdown": true,
+        "Milestone": true,
+        "Banner": true,
+        "TFL tube status": true,
+        "UK Travel Boards (Train & Bus)": true,
+        "SOC2": true,
+        "ISO27001": true,
+        "IS27017": true
+      }
+    }
+  ],
+  "metadata": {
+    "total_partners": 40,
+    "last_updated": "2025-02-17"
+  }
+};
+
+        function PartnerFinder() {
+            const [query, setQuery] = useState('');
+            const [results, setResults] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState(null);
+
+            const exampleQueries = [
+                "which CMS partner has on prem offering and can support Sharepoint in MEA region?",
+                "partners with retail focus in Europe",
+                "who supports corporate communications in APAC?",
+                "CMS with banking experience and US presence"
+            ];
+
+            const parseQuery = (queryText) => {
+                const lower = queryText.toLowerCase();
+                const filters = {
+                    features: [],
+                    regions: [],
+                    verticals: []
+                };
+
+                // Feature detection
+                if (lower.includes('on-prem') || lower.includes('on prem')) {
+                    filters.features.push('On Prem');
+                }
+                if (lower.includes('sharepoint') || lower.includes('share point')) {
+                    filters.features.push('Web - Sharepoint');
+                    filters.features.push('Sharepoint');
+                }
+                if (lower.includes('remote firmware')) {
+                    filters.features.push('Remote Firmware updates');
+                }
+                if (lower.includes('multizone')) {
+                    filters.features.push('Multizone Media Playback');
+                }
+
+                // Region detection
+                const regions = ['Europe', 'MEA', 'APAC', 'ANZ', 'US', 'India'];
+                regions.forEach(region => {
+                    if (lower.includes(region.toLowerCase())) {
+                        filters.regions.push(region);
+                    }
+                });
+
+                // Vertical detection
+                const verticals = [
+                    { keywords: ['retail', 'store'], name: 'Retail' },
+                    { keywords: ['corporate', 'enterprise', 'workplace'], name: 'Corporate' },
+                    { keywords: ['bank', 'banking', 'financial'], name: 'Banking' },
+                    { keywords: ['qsr', 'restaurant', 'c-store'], name: 'QSR/C-store' },
+                    { keywords: ['hospital', 'healthcare', 'medical'], name: 'Healthcare' },
+                    { keywords: ['education', 'university', 'school'], name: 'Education' },
+                    { keywords: ['transport', 'airport', 'transit'], name: 'Transportation' },
+                    { keywords: ['advertising', 'dooh', 'ad network'], name: 'Advertising' }
+                ];
+
+                verticals.forEach(vertical => {
+                    if (vertical.keywords.some(kw => lower.includes(kw))) {
+                        filters.verticals.push({ name: vertical.name, minThreshold: 0.1 });
+                    }
+                });
+
+                return filters;
+            };
+
+            const scorePartner = (partner, filters) => {
+                let score = 0;
+                let maxScore = 0;
+                const reasons = [];
+
+                // Feature scoring (30 points per required feature)
+                filters.features.forEach(feature => {
+                    maxScore += 30;
+                    const hasFeature = Object.keys(partner.features).some(key => 
+                        key.toLowerCase().includes(feature.toLowerCase()) && 
+                        partner.features[key] === true
+                    );
+                    
+                    if (hasFeature) {
+                        score += 30;
+                        reasons.push({ text: `Has ${feature}`, type: 'positive' });
+                    } else {
+                        reasons.push({ text: `Missing ${feature}`, type: 'negative' });
+                    }
+                });
+
+                // Region scoring (20 points per required region)
+                filters.regions.forEach(region => {
+                    maxScore += 20;
+                    if (partner.regions.includes(region)) {
+                        score += 20;
+                        reasons.push({ text: `Covers ${region}`, type: 'positive' });
+                    } else {
+                        reasons.push({ text: `No ${region} presence`, type: 'negative' });
+                    }
+                });
+
+                // Vertical scoring (20 points per vertical, scaled by percentage)
+                filters.verticals.forEach(vertical => {
+                    maxScore += 20;
+                    const verticalStrength = partner.verticals[vertical.name] || 0;
+                    if (verticalStrength >= vertical.minThreshold) {
+                        const points = Math.floor(verticalStrength * 20);
+                        score += points;
+                        reasons.push({ 
+                            text: `${vertical.name}: ${(verticalStrength * 100).toFixed(0)}% focus`, 
+                            type: 'positive' 
+                        });
+                    } else if (verticalStrength > 0) {
+                        reasons.push({ 
+                            text: `${vertical.name}: only ${(verticalStrength * 100).toFixed(0)}% focus`, 
+                            type: 'neutral' 
+                        });
+                    }
+                });
+
+                // Calculate percentage score
+                const percentageScore = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+
+                return {
+                    partner: partner.name,
+                    score: percentageScore,
+                    reasons,
+                    verticals: partner.verticals,
+                    regions: partner.regions
+                };
+            };
+
+            const handleSearch = () => {
+                if (!query.trim()) return;
+
+                setIsLoading(true);
+                setError(null);
+
+                try {
+                    const filters = parseQuery(query);
+                    
+                    // Score all partners
+                    const scoredPartners = PARTNER_DATA.partners
+                        .map(partner => scorePartner(partner, filters))
+                        .filter(result => result.score > 0) // Only show partners with some match
+                        .sort((a, b) => b.score - a.score);
+
+                    setResults({
+                        query,
+                        filters,
+                        partners: scoredPartners
+                    });
+                } catch (err) {
+                    setError('Error processing query. Please try again.');
+                    console.error(err);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            const handleExampleClick = (example) => {
+                setQuery(example);
+                setTimeout(() => {
+                    handleSearch();
+                }, 100);
+            };
+
+            const getScoreClass = (score) => {
+                if (score >= 70) return 'score-high';
+                if (score >= 40) return 'score-medium';
+                return 'score-low';
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1>🔍 BrightSign Partner Finder</h1>
+                        <p>Search {PARTNER_DATA.partners.length} CMS partners by capability, region, and vertical</p>
+                    </div>
+
+                    <div className="search-card">
+                        <div className="search-input-wrapper">
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Ask a question... e.g., 'which partners have on-prem and support SharePoint in MEA?'"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            />
+                        </div>
+                        
+                        <button 
+                            className="search-btn" 
+                            onClick={handleSearch}
+                            disabled={!query.trim() || isLoading}
+                        >
+                            {isLoading ? 'Searching...' : 'Search Partners'}
+                        </button>
+
+                        <div className="examples">
+                            <div className="examples-title">Try these examples:</div>
+                            {exampleQueries.map((example, idx) => (
+                                <span
+                                    key={idx}
+                                    className="example-btn"
+                                    onClick={() => handleExampleClick(example)}
+                                >
+                                    {example}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="error">{error}</div>
+                    )}
+
+                    {isLoading && (
+                        <div className="loading">
+                            Searching through partner database...
+                        </div>
+                    )}
+
+                    {results && !isLoading && (
+                        <div className="results-card">
+                            <h2 style={{marginBottom: '20px', color: '#333'}}>
+                                Found {results.partners.length} matching partners
+                            </h2>
+
+                            {results.partners.length === 0 ? (
+                                <div className="no-results">
+                                    <p>No partners match all criteria. Try adjusting your search.</p>
+                                </div>
+                            ) : (
+                                results.partners.map((result, idx) => (
+                                    <div key={idx} className="result-item">
+                                        <div className="result-header">
+                                            <div className="partner-name">
+                                                {idx + 1}. {result.partner}
+                                            </div>
+                                            <div className={`score-badge ${getScoreClass(result.score)}`}>
+                                                {result.score}/100
+                                            </div>
+                                        </div>
+
+                                        <ul className="reasons-list">
+                                            {result.reasons.map((reason, ridx) => (
+                                                <li key={ridx} className={`reason-item ${reason.type}`}>
+                                                    <span className="reason-icon">
+                                                        {reason.type === 'positive' ? '✓' : 
+                                                         reason.type === 'negative' ? '✗' : '•'}
+                                                    </span>
+                                                    {reason.text}
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                        <div className="details-section">
+                                            <div className="details-title">Geographic Coverage:</div>
+                                            <div className="tags">
+                                                {result.regions.map((region, ridx) => (
+                                                    <span key={ridx} className="tag">{region}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="details-section">
+                                            <div className="details-title">Top Verticals:</div>
+                                            <div className="tags">
+                                                {Object.entries(result.verticals)
+                                                    .filter(([_, val]) => val > 0)
+                                                    .sort((a, b) => b[1] - a[1])
+                                                    .slice(0, 5)
+                                                    .map(([vertical, percentage], vidx) => (
+                                                        <span key={vidx} className="tag">
+                                                            {vertical}: {(percentage * 100).toFixed(0)}%
+                                                        </span>
+                                                    ))
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<PartnerFinder />, document.getElementById('root'));
+    </script>
+</body>
+</html>
