@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CMS Navigator — Search Analytics</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.7/chart.umd.min.js"></script>
+<style>
+:root {
+  --purple-900: #4C1D6E;
+  --purple-700: #7B2D8E;
+  --purple-600: #8B3FA0;
+  --purple-500: #9B59B6;
+  --purple-100: #F3E8FF;
+  --purple-50: #FAF5FF;
+  --green-600: #059669;
+  --green-500: #10B981;
+  --amber-600: #D97706;
+  --amber-500: #F59E0B;
+  --red-600: #DC2626;
+  --red-500: #EF4444;
+  --blue-600: #2563EB;
+  --blue-500: #3B82F6;
+  --slate-900: #0F172A;
+  --slate-800: #1E293B;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748B;
+  --slate-400: #94A3B8;
+  --slate-300: #CBD5E1;
+  --slate-200: #E2E8F0;
+  --slate-100: #F1F5F9;
+  --slate-50: #F8FAFC;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--slate-50); color: var(--slate-800); line-height: 1.5; }
+.header { background: var(--purple-900); color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.02em; }
+.header h1 span { color: var(--purple-500); font-weight: 400; margin-left: 8px; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.header-badge { font-size: 11px; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.15s; }
+.btn-primary { background: var(--purple-700); color: white; }
+.btn-primary:hover { background: var(--purple-600); }
+.btn-outline { background: white; color: var(--slate-700); border: 1px solid var(--slate-300); }
+.btn-outline:hover { border-color: var(--purple-500); color: var(--purple-700); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.container { max-width: 1280px; margin: 0 auto; padding: 20px; }
+
+/* Data Input Section */
+.data-input { background: white; border: 1px solid var(--slate-200); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+.data-input-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.data-input-header h2 { font-size: 14px; font-weight: 600; color: var(--slate-700); }
+.data-input-body { margin-top: 16px; }
+.data-input-body.collapsed { display: none; }
+.data-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.textarea-wrap { position: relative; }
+.textarea-wrap textarea { width: 100%; height: 120px; border: 1px solid var(--slate-300); border-radius: 6px; padding: 10px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; resize: vertical; }
+.file-input { display: none; }
+
+/* Filter Bar */
+.filter-bar { background: white; border: 1px solid var(--slate-200); border-radius: 10px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.filter-bar label { font-size: 12px; font-weight: 600; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.05em; }
+.filter-bar input[type="date"], .filter-bar select { padding: 6px 10px; border: 1px solid var(--slate-300); border-radius: 5px; font-size: 13px; color: var(--slate-700); }
+.filter-bar .event-count { margin-left: auto; font-size: 13px; color: var(--slate-500); }
+.filter-bar .event-count strong { color: var(--purple-700); }
+
+/* KPI Cards */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.kpi-card { background: white; border: 1px solid var(--slate-200); border-radius: 10px; padding: 16px; }
+.kpi-card .kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slate-500); margin-bottom: 4px; }
+.kpi-card .kpi-value { font-size: 28px; font-weight: 700; color: var(--slate-800); }
+.kpi-card .kpi-sub { font-size: 12px; color: var(--slate-400); margin-top: 2px; }
+.kpi-card.highlight { border-color: var(--purple-500); background: var(--purple-50); }
+.kpi-card.highlight .kpi-value { color: var(--purple-700); }
+.kpi-card.warning .kpi-value { color: var(--amber-600); }
+.kpi-card.danger .kpi-value { color: var(--red-600); }
+
+/* Charts Grid */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.chart-card { background: white; border: 1px solid var(--slate-200); border-radius: 10px; padding: 20px; }
+.chart-card.full-width { grid-column: 1 / -1; }
+.chart-card h3 { font-size: 14px; font-weight: 600; color: var(--slate-700); margin-bottom: 4px; }
+.chart-card .chart-sub { font-size: 12px; color: var(--slate-400); margin-bottom: 14px; }
+.chart-wrap { position: relative; width: 100%; }
+.chart-wrap canvas { width: 100% !important; }
+
+/* Tables */
+.table-card { background: white; border: 1px solid var(--slate-200); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+.table-card h3 { font-size: 14px; font-weight: 600; color: var(--slate-700); margin-bottom: 4px; }
+.table-card .table-sub { font-size: 12px; color: var(--slate-400); margin-bottom: 14px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { text-align: left; padding: 8px 12px; background: var(--slate-50); color: var(--slate-600); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 2px solid var(--slate-200); }
+tbody td { padding: 8px 12px; border-bottom: 1px solid var(--slate-100); color: var(--slate-700); }
+tbody tr:hover { background: var(--purple-50); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.badge-red { background: #FEE2E2; color: var(--red-600); }
+.badge-amber { background: #FEF3C7; color: var(--amber-600); }
+.badge-green { background: #D1FAE5; color: var(--green-600); }
+.badge-purple { background: var(--purple-100); color: var(--purple-700); }
+.badge-blue { background: #DBEAFE; color: var(--blue-600); }
+
+/* Heatmap */
+.heatmap-cell { display: inline-block; width: 100%; text-align: center; padding: 4px; border-radius: 3px; font-size: 12px; font-weight: 600; }
+.heat-high-demand-low-supply { background: #FEE2E2; color: var(--red-600); }
+.heat-high-demand-high-supply { background: #D1FAE5; color: var(--green-600); }
+.heat-med-demand { background: #FEF3C7; color: var(--amber-600); }
+.heat-low-demand { background: var(--slate-100); color: var(--slate-500); }
+
+/* Empty state */
+.empty-state { text-align: center; padding: 60px 20px; color: var(--slate-400); }
+.empty-state h3 { font-size: 16px; color: var(--slate-600); margin-bottom: 8px; }
+.empty-state p { font-size: 13px; margin-bottom: 16px; }
+
+/* Developer guide */
+
+/* Collapsible */
+.collapsible-toggle { cursor: pointer; user-select: none; }
+.collapsible-toggle::after { content: ' ▾'; font-size: 12px; }
+.collapsible-toggle.open::after { content: ' ▴'; }
+
+/* Print */
+@media print {
+  .header { padding: 10px 16px; }
+  .data-input, .filter-bar .btn, .no-print { display: none !important; }
+  .container { padding: 10px; max-width: 100%; }
+  .charts-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .chart-card, .table-card, .kpi-card { break-inside: avoid; border: 1px solid #ddd; }
+  .kpi-grid { grid-template-columns: repeat(6, 1fr); }
+  body { background: white; }
+  .filter-bar { border: none; padding: 8px 0; }
+  .filter-bar .event-count { margin-left: 0; }
+}
+@media (max-width: 768px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>BrightSign<span>CMS Navigator — Search Analytics</span></h1>
+  <div class="header-right">
+    <span class="header-badge">Internal Use Only</span>
+    <button class="btn btn-outline btn-sm no-print" onclick="window.print()" style="color:white;border-color:rgba(255,255,255,0.3)">Print Report</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Data Input -->
+  <div class="data-input no-print" id="dataInput">
+    <div class="data-input-header" onclick="toggleDataInput()">
+      <h2 class="collapsible-toggle" id="dataToggle">Data Source</h2>
+      <span id="dataStatus" style="font-size:12px;color:var(--slate-400)">No data loaded</span>
+    </div>
+    <div class="data-input-body" id="dataBody">
+      <div class="data-actions">
+        <button class="btn btn-primary" onclick="loadSampleData()">Load Sample Data (75 events)</button>
+        <button class="btn btn-outline" onclick="document.getElementById('fileInput').click()">Load JSON File</button>
+        <button class="btn btn-outline" onclick="loadFromLocalStorage()">Load from Navigator</button>
+        <input type="file" id="fileInput" class="file-input" accept=".json" onchange="loadFromFile(event)">
+      </div>
+      <div class="textarea-wrap">
+        <textarea id="jsonInput" placeholder='Paste JSON array here — e.g. [{"timestamp":"2026-06-01T10:00:00Z","query":"retail CMS Europe","parsedTerms":{"verticals":["Retail"],"regions":["Europe"],"features":[],"deployment":[],"security":[]},"resultCount":12,"presetUsed":"feature-first","partnersViewed":["Navori"],"partnersCompared":[]}]'></textarea>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button class="btn btn-sm btn-outline" onclick="parseAndLoad()">Parse &amp; Load</button>
+        <button class="btn btn-sm btn-outline" onclick="exportData()">Export Current Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar" id="filterBar" style="display:none;">
+    <label>Filters</label>
+    <input type="date" id="filterStart" onchange="applyFilters()">
+    <span style="color:var(--slate-400)">to</span>
+    <input type="date" id="filterEnd" onchange="applyFilters()">
+    <select id="filterPreset" onchange="applyFilters()">
+      <option value="all">All presets</option>
+      <option value="feature-first">Feature-first</option>
+      <option value="customer-fit">Customer fit</option>
+      <option value="enterprise">Enterprise</option>
+      <option value="innovation">Innovation</option>
+    </select>
+    <button class="btn btn-sm btn-outline no-print" onclick="clearFilters()">Clear</button>
+    <span class="event-count" id="eventCount"></span>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" id="emptyState">
+    <h3>No analytics data loaded</h3>
+    <p>Load sample data to preview the dashboard, or paste/upload real analytics JSON from the CMS Navigator.</p>
+    <button class="btn btn-primary" onclick="loadSampleData()">Load Sample Data</button>
+  </div>
+
+  <!-- Dashboard Content (hidden until data loads) -->
+  <div id="dashboardContent" style="display:none;">
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card full-width">
+        <h3>Search Volume Over Time</h3>
+        <p class="chart-sub">Daily search count across the selected period</p>
+        <div class="chart-wrap"><canvas id="chartVolume"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Top Searched Terms</h3>
+        <p class="chart-sub">Most frequent terms across all categories</p>
+        <div class="chart-wrap"><canvas id="chartTopTerms"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Preset Usage</h3>
+        <p class="chart-sub">Which scoring preset reps choose</p>
+        <div class="chart-wrap" style="max-width:300px;margin:0 auto;"><canvas id="chartPresets"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Most Viewed Partners</h3>
+        <p class="chart-sub">Partner profiles clicked into from results</p>
+        <div class="chart-wrap"><canvas id="chartViewed"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Most Compared Partners</h3>
+        <p class="chart-sub">Partners added to Compare View</p>
+        <div class="chart-wrap"><canvas id="chartCompared"></canvas></div>
+      </div>
+      <div class="chart-card full-width">
+        <h3>Terms by Category</h3>
+        <p class="chart-sub">Breakdown of searched terms: verticals, regions, features, deployment, security</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+          <div><h4 style="font-size:12px;color:var(--slate-500);margin-bottom:6px;">Verticals</h4><canvas id="chartCatVerticals"></canvas></div>
+          <div><h4 style="font-size:12px;color:var(--slate-500);margin-bottom:6px;">Regions</h4><canvas id="chartCatRegions"></canvas></div>
+          <div><h4 style="font-size:12px;color:var(--slate-500);margin-bottom:6px;">Features</h4><canvas id="chartCatFeatures"></canvas></div>
+          <div><h4 style="font-size:12px;color:var(--slate-500);margin-bottom:6px;">Deployment</h4><canvas id="chartCatDeployment"></canvas></div>
+          <div><h4 style="font-size:12px;color:var(--slate-500);margin-bottom:6px;">Security</h4><canvas id="chartCatSecurity"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zero-result searches -->
+    <div class="table-card">
+      <h3>Zero-Result Searches <span class="badge badge-red" id="zeroCount"></span></h3>
+      <p class="table-sub">Queries that returned 0 matches — these are market signals and unmet demand</p>
+      <table id="tableZero">
+        <thead><tr><th>Date</th><th>Query</th><th>Parsed Terms</th><th>Preset</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p id="zeroEmpty" style="display:none;text-align:center;padding:20px;color:var(--slate-400);font-size:13px;">No zero-result searches in this period</p>
+    </div>
+
+    <!-- Feature Demand Heatmap -->
+    <div class="table-card">
+      <h3>Feature Demand vs. Supply</h3>
+      <p class="table-sub">Features searched for most often, coloured by gap between demand and how many partners support them. Red = high demand, low supply (opportunity).</p>
+      <table id="tableHeatmap">
+        <thead><tr><th>Feature</th><th>Times Searched</th><th>% of Searches</th><th>Signal</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Top Queries Table -->
+    <div class="table-card">
+      <h3>All Queries</h3>
+      <p class="table-sub">Every search event in the selected period</p>
+      <div style="max-height:400px;overflow-y:auto;">
+        <table id="tableQueries">
+          <thead><tr><th>Date</th><th>Query</th><th>Results</th><th>Preset</th><th>Viewed</th><th>Compared</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+
+  <footer style="text-align:center;padding:20px;font-size:12px;color:var(--slate-400);">
+    BrightSign CMS Navigator — Search Analytics Dashboard &middot; Internal use only
+  </footer>
+</div>
+
+<script>
+// ─── STATE ───
+let allData = [];
+let filteredData = [];
+let charts = {};
+
+// ─── SAMPLE DATA GENERATOR ───
+function generateSampleData() {
+  const queries = [
+    { q: "retail CMS for Europe with IPTV", v: ["Retail"], r: ["Europe"], f: ["IPTV"], d: [], s: [], rc: 12 },
+    { q: "healthcare digital signage US", v: ["Healthcare"], r: ["US"], f: [], d: [], s: [], rc: 8 },
+    { q: "SOC2 certified cloud platform", v: [], r: [], f: [], d: ["cloud"], s: ["SOC2"], rc: 5 },
+    { q: "QSR menu boards drive-thru", v: ["QSR/C-store"], r: [], f: ["menu board"], d: [], s: [], rc: 6 },
+    { q: "corporate video wall sync", v: ["Corporate"], r: [], f: ["video wall", "sync"], d: [], s: [], rc: 15 },
+    { q: "interactive touchscreen retail Europe", v: ["Retail"], r: ["Europe"], f: ["touchscreen", "interactive"], d: [], s: [], rc: 9 },
+    { q: "on-prem CMS for banking", v: ["Banking"], r: [], f: [], d: ["on-prem"], s: [], rc: 4 },
+    { q: "stadium signage APAC", v: ["Stadiums/Venues"], r: ["APAC"], f: [], d: [], s: [], rc: 3 },
+    { q: "wayfinding kiosk hospitality", v: ["Hospitality"], r: [], f: ["wayfinding"], d: [], s: [], rc: 7 },
+    { q: "sync across multiple screens", v: [], r: [], f: ["sync", "multizone"], d: [], s: [], rc: 11 },
+    { q: "cloud CMS for education", v: ["Higher Education"], r: [], f: [], d: ["cloud"], s: [], rc: 6 },
+    { q: "proof of play retail analytics", v: ["Retail"], r: [], f: ["proof of play"], d: [], s: [], rc: 8 },
+    { q: "ISO27001 on-premise Europe", v: [], r: ["Europe"], f: [], d: ["on-prem"], s: ["ISO27001"], rc: 3 },
+    { q: "IPTV multizone for corporate US", v: ["Corporate"], r: ["US"], f: ["IPTV", "multizone"], d: [], s: [], rc: 10 },
+    { q: "retail in APAC with scheduling", v: ["Retail"], r: ["APAC"], f: ["scheduling"], d: [], s: [], rc: 5 },
+    { q: "Navori", v: [], r: [], f: [], d: [], s: [], rc: 1 },
+    { q: "Wallboard", v: [], r: [], f: [], d: [], s: [], rc: 1 },
+    { q: "digital menu board QSR US", v: ["QSR/C-store"], r: ["US"], f: ["menu board"], d: [], s: [], rc: 7 },
+    { q: "4K video wall corporate", v: ["Corporate"], r: [], f: ["4K", "video wall"], d: [], s: [], rc: 13 },
+    { q: "cloud with SSO and SOC2", v: [], r: [], f: [], d: ["cloud"], s: ["SOC2"], rc: 4 },
+    { q: "transportation arrival boards", v: ["Transportation"], r: [], f: [], d: [], s: [], rc: 5 },
+    { q: "AI personalisation retail", v: ["Retail"], r: [], f: ["AI"], d: [], s: [], rc: 3 },
+    { q: "LED floor content management", v: [], r: [], f: ["LED"], d: [], s: [], rc: 0 },
+    { q: "automotive showroom displays", v: [], r: [], f: [], d: [], s: [], rc: 0 },
+    { q: "CMS with native TikTok integration", v: [], r: [], f: [], d: [], s: [], rc: 0 },
+    { q: "AR-enabled signage for museum", v: ["Attractions"], r: [], f: ["AR"], d: [], s: [], rc: 0 },
+    { q: "hybrid deployment MEA", v: [], r: ["MEA"], f: [], d: ["hybrid"], s: [], rc: 8 },
+    { q: "worship digital signage", v: ["Worship"], r: [], f: [], d: [], s: [], rc: 4 },
+    { q: "B-Deploy support cloud", v: [], r: [], f: ["B-Deploy"], d: ["cloud"], s: [], rc: 9 },
+    { q: "portrait mode retail India", v: ["Retail"], r: ["India"], f: ["portrait"], d: [], s: [], rc: 3 },
+    { q: "government public info screens", v: ["Government"], r: [], f: [], d: [], s: [], rc: 5 },
+    { q: "HDMI input corporate", v: ["Corporate"], r: [], f: ["HDMI input"], d: [], s: [], rc: 12 },
+    { q: "easescreen", v: [], r: [], f: [], d: [], s: [], rc: 1 },
+    { q: "retail Europe IPTV proof of play", v: ["Retail"], r: ["Europe"], f: ["IPTV", "proof of play"], d: [], s: [], rc: 6 },
+    { q: "healthcare US SOC2 cloud", v: ["Healthcare"], r: ["US"], f: [], d: ["cloud"], s: ["SOC2"], rc: 2 },
+    { q: "CMS with blockchain verification", v: [], r: [], f: [], d: [], s: [], rc: 0 },
+    { q: "stadium video wall ANZ", v: ["Stadiums/Venues"], r: ["ANZ"], f: ["video wall"], d: [], s: [], rc: 2 },
+    { q: "manufacturing floor displays", v: ["Manufacturing"], r: [], f: [], d: [], s: [], rc: 4 },
+    { q: "Poppulo FWI", v: [], r: [], f: [], d: [], s: [], rc: 1 },
+    { q: "Appspace", v: [], r: [], f: [], d: [], s: [], rc: 1 },
+    { q: "contact centre screens US", v: ["Contact Centre"], r: ["US"], f: [], d: [], s: [], rc: 3 },
+    { q: "interactive kiosk with Nexmosphere", v: [], r: [], f: ["interactive", "Nexmosphere"], d: [], s: [], rc: 8 },
+    { q: "GPIO triggers retail", v: ["Retail"], r: [], f: ["GPIO"], d: [], s: [], rc: 6 },
+    { q: "enterprise on-prem ISO27001 Europe", v: [], r: ["Europe"], f: [], d: ["on-prem"], s: ["ISO27001"], rc: 2 },
+    { q: "education campus-wide APAC", v: ["Higher Education"], r: ["APAC"], f: [], d: [], s: [], rc: 3 },
+    { q: "retail DOOH advertising", v: ["Retail", "Advertising/DOOH"], r: [], f: [], d: [], s: [], rc: 4 },
+  ];
+  const presets = ["feature-first", "feature-first", "feature-first", "customer-fit", "customer-fit", "enterprise", "innovation"];
+  const partners = ["Navori", "Wallboard", "easescreen", "Appspace", "Poppulo FWI", "Wallsign", "Korbyt", "Pickcel", "Broadsign", "Signagelive",
+    "Scala", "Yodeck", "Rise Vision", "OptiSigns", "NoviSign", "Mvix", "Arreya", "Spectrio", "Enplug", "Carousel Digital Signage"];
+
+  const events = [];
+  const now = new Date();
+  for (let i = 0; i < 75; i++) {
+    const template = queries[i % queries.length];
+    const daysAgo = Math.floor(Math.random() * 30);
+    const hour = 8 + Math.floor(Math.random() * 10);
+    const minute = Math.floor(Math.random() * 60);
+    const d = new Date(now);
+    d.setDate(d.getDate() - daysAgo);
+    d.setHours(hour, minute, 0, 0);
+
+    const viewed = [];
+    const compared = [];
+    if (template.rc > 0) {
+      const viewCount = Math.min(Math.floor(Math.random() * 3) + 1, template.rc);
+      for (let v = 0; v < viewCount; v++) {
+        const p = partners[Math.floor(Math.random() * partners.length)];
+        if (!viewed.includes(p)) viewed.push(p);
+      }
+      if (Math.random() > 0.6 && viewed.length >= 2) {
+        compared.push(...viewed.slice(0, Math.min(3, viewed.length)));
+      }
+    }
+
+    events.push({
+      timestamp: d.toISOString(),
+      query: template.q,
+      parsedTerms: { verticals: template.v, regions: template.r, features: template.f, deployment: template.d, security: template.s },
+      resultCount: template.rc,
+      presetUsed: presets[Math.floor(Math.random() * presets.length)],
+      partnersViewed: viewed,
+      partnersCompared: compared,
+    });
+  }
+  return events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+}
+
+// ─── DATA LOADING ───
+function loadSampleData() {
+  allData = generateSampleData();
+  onDataLoaded("Sample data (75 events)");
+}
+function parseAndLoad() {
+  try {
+    const raw = document.getElementById("jsonInput").value.trim();
+    if (!raw) return alert("Paste JSON data first.");
+    const parsed = JSON.parse(raw);
+    allData = Array.isArray(parsed) ? parsed : [parsed];
+    onDataLoaded(allData.length + " events from paste");
+  } catch (e) { alert("Invalid JSON: " + e.message); }
+}
+function loadFromFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      allData = JSON.parse(ev.target.result);
+      if (!Array.isArray(allData)) allData = [allData];
+      onDataLoaded(allData.length + " events from " + file.name);
+    } catch (err) { alert("Invalid JSON file: " + err.message); }
+  };
+  reader.readAsText(file);
+}
+function loadFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem("cms-navigator-analytics");
+    if (!raw) return alert("No Navigator analytics found in localStorage. Make sure the Navigator is logging searches on this browser.");
+    allData = JSON.parse(raw);
+    onDataLoaded(allData.length + " events from Navigator");
+  } catch (e) { alert("Error reading localStorage: " + e.message); }
+}
+function exportData() {
+  if (!allData.length) return alert("No data loaded.");
+  const blob = new Blob([JSON.stringify(allData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url;
+  a.download = "cms-analytics-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function onDataLoaded(label) {
+  document.getElementById("dataStatus").textContent = label;
+  document.getElementById("emptyState").style.display = "none";
+  document.getElementById("dashboardContent").style.display = "block";
+  document.getElementById("filterBar").style.display = "flex";
+  // Collapse data input
+  document.getElementById("dataBody").classList.add("collapsed");
+  document.getElementById("dataToggle").classList.add("open");
+  // Set date range
+  const dates = allData.map(e => e.timestamp.slice(0, 10)).sort();
+  document.getElementById("filterStart").value = dates[0];
+  document.getElementById("filterEnd").value = dates[dates.length - 1];
+  applyFilters();
+}
+
+// ─── FILTERING ───
+function applyFilters() {
+  const start = document.getElementById("filterStart").value;
+  const end = document.getElementById("filterEnd").value;
+  const preset = document.getElementById("filterPreset").value;
+  filteredData = allData.filter(e => {
+    const d = e.timestamp.slice(0, 10);
+    if (start && d < start) return false;
+    if (end && d > end) return false;
+    if (preset !== "all" && e.presetUsed !== preset) return false;
+    return true;
+  });
+  document.getElementById("eventCount").innerHTML = "<strong>" + filteredData.length + "</strong> of " + allData.length + " events";
+  renderDashboard();
+}
+function clearFilters() {
+  const dates = allData.map(e => e.timestamp.slice(0, 10)).sort();
+  document.getElementById("filterStart").value = dates[0];
+  document.getElementById("filterEnd").value = dates[dates.length - 1];
+  document.getElementById("filterPreset").value = "all";
+  applyFilters();
+}
+
+// ─── HELPERS ───
+function countMap(arr) {
+  const m = {};
+  arr.forEach(v => { m[v] = (m[v] || 0) + 1; });
+  return m;
+}
+function topN(map, n) {
+  return Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, n);
+}
+function destroyChart(key) {
+  if (charts[key]) { charts[key].destroy(); delete charts[key]; }
+}
+const PURPLE_PALETTE = ["#7B2D8E", "#9B59B6", "#6C3483", "#A569BD", "#D2B4DE", "#4C1D6E"];
+const CATEGORY_COLORS = { verticals: "#7B2D8E", regions: "#2563EB", features: "#059669", deployment: "#D97706", security: "#DC2626" };
+
+// ─── RENDER ───
+function renderDashboard() {
+  renderKPIs();
+  renderVolumeChart();
+  renderTopTermsChart();
+  renderPresetsChart();
+  renderViewedChart();
+  renderComparedChart();
+  renderCategoryCharts();
+  renderZeroTable();
+  renderHeatmap();
+  renderQueriesTable();
+}
+
+function renderKPIs() {
+  const total = filteredData.length;
+  const unique = new Set(filteredData.map(e => e.query.toLowerCase())).size;
+  const zero = filteredData.filter(e => e.resultCount === 0).length;
+  const zeroPct = total ? Math.round((zero / total) * 100) : 0;
+  const avgResults = total ? Math.round(filteredData.reduce((s, e) => s + e.resultCount, 0) / total) : 0;
+  // Top vertical
+  const allVerts = filteredData.flatMap(e => e.parsedTerms.verticals || []);
+  const topVert = topN(countMap(allVerts), 1);
+  // Top feature
+  const allFeats = filteredData.flatMap(e => e.parsedTerms.features || []);
+  const topFeat = topN(countMap(allFeats), 1);
+
+  const grid = document.getElementById("kpiGrid");
+  grid.innerHTML = `
+    <div class="kpi-card highlight"><div class="kpi-label">Total Searches</div><div class="kpi-value">${total}</div><div class="kpi-sub">in selected period</div></div>
+    <div class="kpi-card"><div class="kpi-label">Unique Queries</div><div class="kpi-value">${unique}</div><div class="kpi-sub">${total ? Math.round((unique/total)*100) : 0}% unique</div></div>
+    <div class="kpi-card ${zeroPct > 15 ? 'danger' : zeroPct > 5 ? 'warning' : ''}"><div class="kpi-label">Zero-Result Rate</div><div class="kpi-value">${zeroPct}%</div><div class="kpi-sub">${zero} searches with 0 matches</div></div>
+    <div class="kpi-card"><div class="kpi-label">Avg Results / Search</div><div class="kpi-value">${avgResults}</div><div class="kpi-sub">out of 53 partners</div></div>
+    <div class="kpi-card"><div class="kpi-label">Top Vertical</div><div class="kpi-value" style="font-size:20px">${topVert.length ? topVert[0][0] : '—'}</div><div class="kpi-sub">${topVert.length ? topVert[0][1] + ' searches' : 'no data'}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Top Feature</div><div class="kpi-value" style="font-size:20px">${topFeat.length ? topFeat[0][0] : '—'}</div><div class="kpi-sub">${topFeat.length ? topFeat[0][1] + ' searches' : 'no data'}</div></div>
+  `;
+}
+
+function renderVolumeChart() {
+  destroyChart("volume");
+  const dayMap = {};
+  filteredData.forEach(e => {
+    const d = e.timestamp.slice(0, 10);
+    dayMap[d] = (dayMap[d] || 0) + 1;
+  });
+  const sorted = Object.entries(dayMap).sort((a, b) => a[0].localeCompare(b[0]));
+  // Fill gaps
+  if (sorted.length > 1) {
+    const start = new Date(sorted[0][0]);
+    const end = new Date(sorted[sorted.length - 1][0]);
+    const filled = {};
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const key = d.toISOString().slice(0, 10);
+      filled[key] = dayMap[key] || 0;
+    }
+    const entries = Object.entries(filled).sort((a, b) => a[0].localeCompare(b[0]));
+    charts.volume = new Chart(document.getElementById("chartVolume"), {
+      type: "line",
+      data: {
+        labels: entries.map(e => { const d = new Date(e[0] + "T00:00:00"); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }); }),
+        datasets: [{ label: "Searches", data: entries.map(e => e[1]), borderColor: "#7B2D8E", backgroundColor: "rgba(123,45,142,0.1)", fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: "#7B2D8E" }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } } }
+    });
+  }
+}
+
+function renderTopTermsChart() {
+  destroyChart("topTerms");
+  const all = filteredData.flatMap(e => [
+    ...(e.parsedTerms.verticals || []),
+    ...(e.parsedTerms.regions || []),
+    ...(e.parsedTerms.features || []),
+    ...(e.parsedTerms.deployment || []),
+    ...(e.parsedTerms.security || []),
+  ]);
+  const top = topN(countMap(all), 12);
+  if (!top.length) return;
+  // Color by category
+  const colors = top.map(([term]) => {
+    // Determine category
+    const cats = { verticals: new Set(), regions: new Set(), features: new Set(), deployment: new Set(), security: new Set() };
+    filteredData.forEach(e => {
+      Object.keys(cats).forEach(c => { (e.parsedTerms[c] || []).forEach(t => cats[c].add(t)); });
+    });
+    if (cats.verticals.has(term)) return CATEGORY_COLORS.verticals;
+    if (cats.regions.has(term)) return CATEGORY_COLORS.regions;
+    if (cats.features.has(term)) return CATEGORY_COLORS.features;
+    if (cats.deployment.has(term)) return CATEGORY_COLORS.deployment;
+    if (cats.security.has(term)) return CATEGORY_COLORS.security;
+    return "#94A3B8";
+  });
+  charts.topTerms = new Chart(document.getElementById("chartTopTerms"), {
+    type: "bar",
+    data: { labels: top.map(e => e[0]), datasets: [{ data: top.map(e => e[1]), backgroundColor: colors, borderRadius: 4 }] },
+    options: { indexAxis: "y", responsive: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } } }
+  });
+}
+
+function renderPresetsChart() {
+  destroyChart("presets");
+  const map = countMap(filteredData.map(e => e.presetUsed));
+  const labels = Object.keys(map);
+  const presetColors = { "feature-first": "#7B2D8E", "customer-fit": "#2563EB", "enterprise": "#059669", "innovation": "#D97706" };
+  charts.presets = new Chart(document.getElementById("chartPresets"), {
+    type: "doughnut",
+    data: { labels, datasets: [{ data: labels.map(l => map[l]), backgroundColor: labels.map(l => presetColors[l] || "#94A3B8"), borderWidth: 2, borderColor: "#fff" }] },
+    options: { responsive: true, plugins: { legend: { position: "bottom", labels: { font: { size: 11 }, padding: 12 } } } }
+  });
+}
+
+function renderViewedChart() {
+  destroyChart("viewed");
+  const all = filteredData.flatMap(e => e.partnersViewed || []);
+  const top = topN(countMap(all), 10);
+  if (!top.length) return;
+  charts.viewed = new Chart(document.getElementById("chartViewed"), {
+    type: "bar",
+    data: { labels: top.map(e => e[0]), datasets: [{ data: top.map(e => e[1]), backgroundColor: "#7B2D8E", borderRadius: 4 }] },
+    options: { indexAxis: "y", responsive: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } } }
+  });
+}
+
+function renderComparedChart() {
+  destroyChart("compared");
+  const all = filteredData.flatMap(e => e.partnersCompared || []);
+  const top = topN(countMap(all), 10);
+  if (!top.length) return;
+  charts.compared = new Chart(document.getElementById("chartCompared"), {
+    type: "bar",
+    data: { labels: top.map(e => e[0]), datasets: [{ data: top.map(e => e[1]), backgroundColor: "#059669", borderRadius: 4 }] },
+    options: { indexAxis: "y", responsive: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } } } }
+  });
+}
+
+function renderCategoryCharts() {
+  ["Verticals", "Regions", "Features", "Deployment", "Security"].forEach(cat => {
+    const key = "cat" + cat;
+    destroyChart(key);
+    const catKey = cat.toLowerCase();
+    const all = filteredData.flatMap(e => e.parsedTerms[catKey] || []);
+    const top = topN(countMap(all), 8);
+    if (!top.length) { document.getElementById("chartCat" + cat).parentElement.innerHTML = '<p style="color:var(--slate-400);font-size:12px;text-align:center;padding:20px;">No data</p>'; return; }
+    charts[key] = new Chart(document.getElementById("chartCat" + cat), {
+      type: "bar",
+      data: { labels: top.map(e => e[0]), datasets: [{ data: top.map(e => e[1]), backgroundColor: CATEGORY_COLORS[catKey] || "#94A3B8", borderRadius: 3 }] },
+      options: { indexAxis: "y", responsive: true, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } }, y: { ticks: { font: { size: 10 } } } } }
+    });
+  });
+}
+
+function renderZeroTable() {
+  const zeros = filteredData.filter(e => e.resultCount === 0).sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  document.getElementById("zeroCount").textContent = zeros.length;
+  const tbody = document.querySelector("#tableZero tbody");
+  const emptyMsg = document.getElementById("zeroEmpty");
+  if (!zeros.length) { tbody.innerHTML = ""; emptyMsg.style.display = "block"; return; }
+  emptyMsg.style.display = "none";
+  tbody.innerHTML = zeros.map(e => {
+    const d = new Date(e.timestamp);
+    const terms = [...(e.parsedTerms.verticals||[]), ...(e.parsedTerms.regions||[]), ...(e.parsedTerms.features||[]), ...(e.parsedTerms.deployment||[]), ...(e.parsedTerms.security||[])];
+    return `<tr><td>${d.toLocaleDateString("en-GB", {day:"numeric",month:"short"})} ${d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</td><td><strong>${escHtml(e.query)}</strong></td><td>${terms.map(t => '<span class="badge badge-purple">' + escHtml(t) + '</span> ').join("")}</td><td>${e.presetUsed}</td></tr>`;
+  }).join("");
+}
+
+function renderHeatmap() {
+  const featureMap = {};
+  filteredData.forEach(e => {
+    (e.parsedTerms.features || []).forEach(f => {
+      featureMap[f] = (featureMap[f] || 0) + 1;
+    });
+  });
+  const sorted = Object.entries(featureMap).sort((a, b) => b[1] - a[1]);
+  const tbody = document.querySelector("#tableHeatmap tbody");
+  if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--slate-400);padding:20px;">No feature-specific searches</td></tr>'; return; }
+  const total = filteredData.length;
+  tbody.innerHTML = sorted.map(([feat, count]) => {
+    const pct = Math.round((count / total) * 100);
+    let signal, cls;
+    if (pct >= 10) { signal = "High demand"; cls = "badge-red"; }
+    else if (pct >= 5) { signal = "Medium demand"; cls = "badge-amber"; }
+    else { signal = "Low demand"; cls = "badge-green"; }
+    return `<tr><td><strong>${escHtml(feat)}</strong></td><td>${count}</td><td>${pct}%</td><td><span class="badge ${cls}">${signal}</span></td></tr>`;
+  }).join("");
+}
+
+function renderQueriesTable() {
+  const sorted = [...filteredData].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  const tbody = document.querySelector("#tableQueries tbody");
+  tbody.innerHTML = sorted.map(e => {
+    const d = new Date(e.timestamp);
+    const resultBadge = e.resultCount === 0 ? '<span class="badge badge-red">0</span>' : e.resultCount;
+    return `<tr><td style="white-space:nowrap">${d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})} ${d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</td><td>${escHtml(e.query)}</td><td>${resultBadge}</td><td>${e.presetUsed}</td><td>${(e.partnersViewed||[]).join(", ") || "—"}</td><td>${(e.partnersCompared||[]).join(", ") || "—"}</td></tr>`;
+  }).join("");
+}
+
+function escHtml(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+// ─── UI HELPERS ───
+function toggleDataInput() {
+  const body = document.getElementById("dataBody");
+  const toggle = document.getElementById("dataToggle");
+  body.classList.toggle("collapsed");
+  toggle.classList.toggle("open");
+}
+</script>
+</body>
+</html>
